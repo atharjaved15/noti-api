@@ -14,7 +14,7 @@ if (!admin.apps.length) {
   });
 }
 
-// ✅ Initialize Firebase Admin once
+// ✅ Initialize 
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
