@@ -4,18 +4,18 @@ import cors from "cors";
 
 const app = express();
 
-// Explicitly allow all origins, methods, and headers
+// Enable CORS for all origins
 app.use(cors({
-  origin: "*",
+  origin: "*", // allow all origins (you can restrict to your web app domain)
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 }));
 
+// Parse JSON body
 app.use(express.json());
 
-// Handle preflight requests for any route
-app.options("*", cors());
-
+// Firebase initialization
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   admin.initializeApp({
@@ -23,10 +23,12 @@ if (!admin.apps.length) {
   });
 }
 
+// Health check
 app.get("/", (req, res) => {
   res.send("✅ Notification API is running!");
 });
 
+// Notification endpoint
 app.post("/send", async (req, res) => {
   try {
     const { tokens, token, title, body, imageUrl } = req.body;
@@ -65,6 +67,14 @@ app.post("/send", async (req, res) => {
     console.error("❌ Error sending notification:", error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// Handle preflight OPTIONS requests explicitly (important for Flutter Web)
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.sendStatus(200);
 });
 
 export default app;
