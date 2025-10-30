@@ -6,10 +6,13 @@ import serverless from "serverless-http";
 const app = express();
 app.use(express.json());
 
-// ✅ Load service account key
-const serviceAccount = JSON.parse(
-  readFileSync("./serviceAccountKey.json", "utf8")
-);
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+}
 
 // ✅ Initialize Firebase Admin once
 if (!admin.apps.length) {
