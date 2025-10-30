@@ -5,7 +5,7 @@ import serverless from "serverless-http";
 const app = express();
 app.use(express.json());
 
-// ✅ Initialize Firebase Admin using env variable
+// ✅ Firebase Admin Init from env var
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   admin.initializeApp({
@@ -13,16 +13,14 @@ if (!admin.apps.length) {
   });
 }
 
-// ✅ Root route
+// ✅ Routes
 app.get("/", (req, res) => {
-  res.status(200).send("🚀 Notification API is running successfully on Vercel!");
+  res.send("🚀 Notification API deployed successfully on Vercel!");
 });
 
-// ✅ Send notification route
 app.post("/send", async (req, res) => {
   try {
     const { token, title, body } = req.body;
-
     if (!token || !title || !body) {
       return res.status(400).send({ error: "Missing required fields" });
     }
@@ -40,5 +38,5 @@ app.post("/send", async (req, res) => {
   }
 });
 
-// ✅ Do NOT use app.listen() on Vercel
+// ✅ Required for Vercel
 export default serverless(app);
