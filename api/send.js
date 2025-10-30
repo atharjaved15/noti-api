@@ -4,17 +4,16 @@ import cors from "cors";
 
 const app = express();
 
-// ✅ Enable CORS for all origins and methods
-app.use(
-  cors({
-    origin: "*", // Allow all origins, can restrict later
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// Explicitly allow all origins, methods, and headers
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 app.use(express.json());
 
-// Handle preflight requests for Flutter Web
+// Handle preflight requests for any route
 app.options("*", cors());
 
 if (!admin.apps.length) {
