@@ -1,16 +1,17 @@
 import express from "express";
 import admin from "firebase-admin";
 import { readFileSync } from "fs";
+import serverless from "serverless-http";
 
 const app = express();
 app.use(express.json());
 
-// ✅ Load service account key from file
+// ✅ Load service account key
 const serviceAccount = JSON.parse(
   readFileSync("./serviceAccountKey.json", "utf8")
 );
 
-// ✅ Initialize Firebase Admin SDK once
+// ✅ Initialize Firebase Admin once
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -30,20 +31,12 @@ app.post("/send", async (req, res) => {
       return res.status(400).send({ error: "Missing required fields" });
     }
 
-    // 📨 Create FCM message
     const message = {
       token,
-      notification: {
-        title,
-        body,
-        imageUrl,
-      },
-      data: {
-        click_action: "FLUTTER_NOTIFICATION_CLICK",
-      },
+      notification: { title, body, imageUrl },
+      data: { click_action: "FLUTTER_NOTIFICATION_CLICK" },
     };
 
-    // ✅ Send message via Firebase Admin
     await admin.messaging().send(message);
 
     console.log(`✅ Notification sent to token: ${token}`);
@@ -54,10 +47,6 @@ app.post("/send", async (req, res) => {
   }
 });
 
-// ✅ Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on port ${PORT}`)
-);
-
-export default app;
+// 🚀 Export for Vercel
+export const handler = serverless(app);
+export default handler;
