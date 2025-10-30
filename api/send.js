@@ -4,11 +4,19 @@ import cors from "cors";
 
 const app = express();
 
-// ✅ Enable CORS for all origins
-app.use(cors());
+// ✅ Enable CORS for all origins and methods
+app.use(
+  cors({
+    origin: "*", // Allow all origins, can restrict later
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
-// Initialize Firebase Admin SDK
+// Handle preflight requests for Flutter Web
+app.options("*", cors());
+
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   admin.initializeApp({
@@ -16,12 +24,10 @@ if (!admin.apps.length) {
   });
 }
 
-// Test endpoint
 app.get("/", (req, res) => {
   res.send("✅ Notification API is running!");
 });
 
-// Send notifications
 app.post("/send", async (req, res) => {
   try {
     const { tokens, token, title, body, imageUrl } = req.body;
@@ -62,5 +68,4 @@ app.post("/send", async (req, res) => {
   }
 });
 
-// ✅ Vercel serverless export
 export default app;
